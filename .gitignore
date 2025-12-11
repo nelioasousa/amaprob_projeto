@@ -1,0 +1,5 @@
+# Ambiente virtual
+venv/
+
+# PDFs
+*.pdf
