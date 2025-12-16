@@ -28,37 +28,27 @@
 12. **[bônus]** Log-Gaussian Cox processes
 
 # Projeto Final
-## Subprojeto 1
+## Problema 1
 Estimação de densidade de probabilidade ou redução de dimensionalidade ou dados faltantes ou geração de dados.
 
-### Ideia 1
-**Dataset:** [HSV data](https://archive.ics.uci.edu/dataset/571/hcv+data)
+**Contextualização:** temos um grande conjunto de imagens de pavimentos asfálticos de rodovias. A grande maioria das imagens não possuem defeitos (remendos, buracos, trincas, outros) e queremos explorar essas imagens para obter exemplos de defeitos. É muito fácil encontrar exemplos sem defeitos, porém os exemplos com defeitos são raros e a exploração manual é de difícil execução. Para auxiliar a exploração, podemos modelar a distribuição das imagens sem defeito e buscar de forma automática por anomalias segundo essa distribuição.
 
-**Tarefas:**
-- inputação de dados faltantes
-- estimação de densidade
-- geração de dados
+**Dados:** conjunto de imagens não rotuladas de pavimentos asfálticos de rodovias.
 
-### Ideia 2
+**Objetivo:** obter um subconjunto de imagens com defeitos para exploração e rotulação.
 
-**Dataset:** imagens de pavimentos asfálticos com rótulos de detecção de buracos e remendos
+**Ideias:**
 
-**Tarefas:**
-- embedding (extração de vetores de características) usando CNNs
-- redução de dimensionalidade no espaço das embeddings
-- agrupamento no espaço das embeddings (dimensão original e reduzida)
+1. Usar um VAE específico para imagens
+2. Usar uma CNN pré-treinada para extração de atributos e aplicar VAE e PPCA em cima dos atributos extraídos
 
-## Subprojeto 2
+## Problema 2
 Regressão com predições probabilística.
 
-### Ideia 1
+**Contextualização:** um sistema de aluguel de bicicletas precisa alocar (estações e quantidade de bibicletas por estação) de forma inteligênte a sua frota de acordo com as demandas de seus usuários. São várias as variáveis que influenciam a demanda por bicicletas de aluguel, como variáveis socioeconômicas, clima e tempo, horário, dia, entre outros.
 
-**Dataset:** [Bike sharing](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset)
+**Dataset:** [Bike sharing](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset).
 
-Predizer a quantidade de usuários casuais e registrados de um sistema de empréstimo de bicicletas. Útil para controlar a frota de bicletas disponíveis em uma localidade para um certo período.
+**Objetivo:** estimar a quantidade de bicicletas alugadas em um certo dia.
 
-### Ideia 2
-
-**Dataset:** [Concrete Compressive Strength](https://archive.ics.uci.edu/dataset/165/concrete+compressive+strength)
-
-Predizer a força de compressão para uma certa mistura de concreto. Útil para auxiliar na confecção de misturas de concreto para obtenção de resistências desejadas.
+**Modelos:** Regressão Linear Bayesiana e Gaussian Process.
