@@ -58,18 +58,18 @@ class DataExplorer:
         return self.data[total_idxs], [self.images[i] for i in total_idxs]
 
 
-def save_iteration(
+def save_result(
     model,
-    iteration: int,
-    clean_features: np.ndarray,
-    clean_image_paths: list,
-    defec_features: np.ndarray,
-    defec_image_paths: list,
+    explorer: DataExplorer,
+    iteration: int = None,
     save_dir: Path = Path('results/'),
 ):
     model_name = type(model).__name__.lower()
-    save_folder = save_dir / model_name / f'iteration_{iteration:02d}'
+    result_str = 'final' if iteration is None else f'iteration_{iteration:02d}'
+    save_folder = save_dir / model_name / result_str
     save_folder.mkdir(parents=True, exist_ok=True)
+    clean_features, clean_image_paths = explorer.get_clean_selected(iteration)
+    defec_features, defec_image_paths = explorer.get_defec_selected(iteration)
     np.save(save_folder / 'clean.npy', clean_features)
     np.save(save_folder / 'defec.npy', defec_features)
     with (save_folder / 'model.pkl').open('wb') as f:
@@ -90,10 +90,6 @@ def exploration(model_class, latent_dim, selection_size, num_iterations):
         clean_feats, _ = explorer.get_clean_selected()
         model = model_class(latent_dim)
         model.fit(clean_feats)
-        save_iteration(
-            model,
-            i,
-            *explorer.get_clean_selected(i),
-            *explorer.get_defec_selected(i),
-        )
+        save_result(model, explorer, i)
         weights = model.evaluate(explorer.data[:, :-1])
+    save_result(model, explorer)
