@@ -1,9 +1,7 @@
 Pillow
 numpy
 tqdm
-
-# Datasets
-ucimlrepo
-
-# YOLO
+matplotlib
 ultralytics
+ipykernel
+scikit-learn
