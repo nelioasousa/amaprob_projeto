@@ -69,12 +69,13 @@ class DataExplorer:
 
 def save_result(
     model,
+    latent_dim: int,
     explorer: DataExplorer,
     iteration: int,
     valid_eval: np.ndarray = None,
     save_dir: Path = Path('results/'),
 ):
-    model_name = type(model).__name__.lower()
+    model_name = f'{type(model).__name__.lower()}_{latent_dim}'
     save_folder = save_dir / model_name / f'iteration_{iteration:02d}'
     save_folder.mkdir(parents=True, exist_ok=True)
     clean_features, clean_image_paths = explorer.get_clean_selected(iteration)
@@ -107,5 +108,5 @@ def exploration(model_class, latent_dim, selection_size, num_iterations):
         model.fit(clean_feats)
         valid_logpdf = model.evaluate(valid_data[:, :-1])
         valid_eval = np.column_stack((valid_data[:, -1], valid_logpdf))
-        save_result(model, explorer, i, valid_eval)
+        save_result(model, latent_dim, explorer, i, valid_eval)
         weights = model.evaluate(explorer.data[:, :-1])
