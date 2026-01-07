@@ -30,6 +30,15 @@ class DataExplorer:
         self.selected[idxs] = True
         return clean_idxs, defec_idxs
 
+    def select_all_remaining(self):
+        idxs = np.nonzero(~self.selected)[0]
+        self.total_iterations.append(idxs)
+        clean_idxs, defec_idxs = self._split_by_class(idxs)
+        self.clean_iterations.append(clean_idxs)
+        self.defec_iterations.append(defec_idxs)
+        self.selected[idxs] = True
+        return clean_idxs, defec_idxs
+
     def _split_by_class(self, idxs: np.ndarray):
         labels = self.data[idxs, -1].astype(bool)
         defec_idxs = idxs[labels]
@@ -61,13 +70,12 @@ class DataExplorer:
 def save_result(
     model,
     explorer: DataExplorer,
-    iteration: int = None,
+    iteration: int,
     valid_eval: np.ndarray = None,
     save_dir: Path = Path('results/'),
 ):
     model_name = type(model).__name__.lower()
-    result_str = 'final' if iteration is None else f'iteration_{iteration:02d}'
-    save_folder = save_dir / model_name / result_str
+    save_folder = save_dir / model_name / f'iteration_{iteration:02d}'
     save_folder.mkdir(parents=True, exist_ok=True)
     clean_features, clean_image_paths = explorer.get_clean_selected(iteration)
     defec_features, defec_image_paths = explorer.get_defec_selected(iteration)
@@ -89,8 +97,11 @@ def exploration(model_class, latent_dim, selection_size, num_iterations):
     valid_data = np.load(DataExplorer.BASE_DIR / 'valid_split.npy')
     explorer = DataExplorer()
     weights = None
-    for i in trange(num_iterations):
-        explorer.select(selection_size, weights=weights)
+    for i in trange(num_iterations + 1):
+        if i == num_iterations:
+            explorer.select_all_remaining()
+        else:
+            explorer.select(selection_size, weights=weights)
         clean_feats, _ = explorer.get_clean_selected()
         model = model_class(latent_dim)
         model.fit(clean_feats)
@@ -98,4 +109,3 @@ def exploration(model_class, latent_dim, selection_size, num_iterations):
         valid_eval = np.column_stack((valid_data[:, -1], valid_logpdf))
         save_result(model, explorer, i, valid_eval)
         weights = model.evaluate(explorer.data[:, :-1])
-    save_result(model, explorer, valid_eval=valid_eval)
