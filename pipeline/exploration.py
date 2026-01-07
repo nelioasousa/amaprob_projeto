@@ -62,6 +62,7 @@ def save_result(
     model,
     explorer: DataExplorer,
     iteration: int = None,
+    valid_eval: np.ndarray = None,
     save_dir: Path = Path('results/'),
 ):
     model_name = type(model).__name__.lower()
@@ -72,6 +73,8 @@ def save_result(
     defec_features, defec_image_paths = explorer.get_defec_selected(iteration)
     np.save(save_folder / 'clean.npy', clean_features)
     np.save(save_folder / 'defec.npy', defec_features)
+    if valid_eval is not None:
+        np.save(save_folder / 'valid.npy', valid_eval)
     with (save_folder / 'model.pkl').open('wb') as f:
         pickle.dump(model, f)
     with (save_folder / 'clean_image_paths.txt').open('w') as f:
@@ -83,6 +86,7 @@ def save_result(
 
 
 def exploration(model_class, latent_dim, selection_size, num_iterations):
+    valid_data = np.load(DataExplorer.BASE_DIR / 'valid_split.npy')
     explorer = DataExplorer()
     weights = None
     for i in trange(num_iterations):
@@ -90,6 +94,7 @@ def exploration(model_class, latent_dim, selection_size, num_iterations):
         clean_feats, _ = explorer.get_clean_selected()
         model = model_class(latent_dim)
         model.fit(clean_feats)
-        save_result(model, explorer, i)
+        valid_logpdf = model.evaluate(valid_data[:, :-1])
+        save_result(model, explorer, i, valid_logpdf)
         weights = model.evaluate(explorer.data[:, :-1])
     save_result(model, explorer)
