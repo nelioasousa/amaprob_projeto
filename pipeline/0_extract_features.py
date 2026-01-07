@@ -36,8 +36,6 @@ def extract_features(images_paths, model_name, num_partitions, save_dir):
         in tqdm(images_paths, desc='Feature Extraction', unit='image')
     ]
     features = np.stack(features)
-    print(features.shape)
-    print(features[0])
     np.save(save_dir / 'features.npy', features, allow_pickle=False)
     # Save image paths
     with open(save_dir / 'image_paths.txt', 'w') as f:
@@ -83,13 +81,9 @@ def _run():
     args.data_dir = args.data_dir.resolve()
     args.output_dir = args.output_dir.resolve()
     imgs = [
-        f for f in args.data_dir.rglob('defec/*.*')
+        f for f in args.data_dir.rglob('*.*')
         if f.suffix.lower() in FMTS
     ]
-
-    if not imgs:
-        print(f'[0] No images found in "{args.data_dir}"')
-        sys.exit(1)
 
     try:
         print(f'[0] Extracting features from {len(imgs)} images...')

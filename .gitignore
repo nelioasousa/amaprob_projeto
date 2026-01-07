@@ -1,3 +1,6 @@
+# Python
+__pycache__/
+
 # Ambiente virtual
 venv/
 
@@ -9,3 +12,6 @@ venv/
 
 # Datasets
 datasets/
+
+# Resultados
+results/

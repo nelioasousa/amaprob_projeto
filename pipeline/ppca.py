@@ -71,9 +71,9 @@ class PPCA:
     def __init__(
         self,
         projection_dim: int,
-        precision_percentage: float = 1e-10,
+        precision_percentage: float = 1e-12,
         plateau_size: int = 10,
-        max_iterations: int = 50,
+        max_iterations: int = 100,
     ):
         self.mean = None
         self.proj = None
@@ -84,7 +84,7 @@ class PPCA:
         self.max_iterations = max_iterations
     
     def fit(self, X: np.ndarray):
-        if self.projection_dim > X.shape[0]:
+        if self.projection_dim > X.shape[1]:
             raise ValueError('Projection dimension greater than data dimension')
         self.D = X.shape[1]
         self.L = self.projection_dim
@@ -94,7 +94,7 @@ class PPCA:
             self.var,
         )
         X_to_mean = X - self.mean
-        old_metric = self.get_log_likelihood(X_to_mean, subtract_mean=False).sum().item()
+        old_metric = self.get_log_likelihood(X_to_mean, subtract_mean=False)
         stabilization_countdown = self.plateau_size
         metric_history = [old_metric]
         for _ in range(1, self.max_iterations + 1):
@@ -103,7 +103,7 @@ class PPCA:
                 self.proj,
                 self.var,
             )
-            new_metric = self.get_log_likelihood(X_to_mean, subtract_mean=False).sum().item()
+            new_metric = self.get_log_likelihood(X_to_mean, subtract_mean=False)
             metric_history.append(new_metric)
             if (old_metric - new_metric) / old_metric < self.precision_percentage:
                 stabilization_countdown -= 1
@@ -112,6 +112,7 @@ class PPCA:
             else:
                 stabilization_countdown = self.plateau_size
             old_metric = new_metric
+        self.marginal_dist = multivariate_normal(self.mean, self.marginal_cov)
         return metric_history
     
     def get_log_likelihood(self, X: np.ndarray, subtract_mean: bool = True):
@@ -120,14 +121,17 @@ class PPCA:
         if subtract_mean:
             X -= self.mean
         N, D = X.shape
-        log_like = -0.5 * (X * X.dot(self.marginal_cov_inv.transpose())).sum(axis=1)
+        log_like = -0.5 * (X * X.dot(self.marginal_cov_inv.transpose())).sum().item()
         _, abs_log_det = np.linalg.slogdet(self.marginal_cov)
-        log_like -= N * abs_log_det / 2
-        log_like -= N * D * np.log(2 * np.pi) / 2
+        log_like -= (N * abs_log_det / 2).item()
+        log_like -= (N * D * np.log(2 * np.pi) / 2).item()
         return log_like
 
+    def get_marginal_logprob(self, X: np.ndarray):
+        return self.marginal_dist.logpdf(X)
+
     def evaluate(self, X: np.ndarray):
-        return self.get_log_likelihood(X)
+        return self.get_marginal_logprob(X)
 
     def generate(self, num_samples: int):
         if self.mean is None:
