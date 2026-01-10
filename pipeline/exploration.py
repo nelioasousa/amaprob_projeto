@@ -9,16 +9,21 @@ class DataExplorer:
 
     def __init__(self):
         with (self.BASE_DIR / 'train_split_image_paths.txt').open('r') as f:
-            self.images = [l.strip() for l in f.readlines()]
-        self.data = np.load(self.BASE_DIR / 'train_split.npy')
+            self.images = f.read().splitlines()
+        self.train_data = np.load(self.BASE_DIR / 'train_split.npy')
+        self.valid_data = np.load(self.BASE_DIR / 'valid_split.npy')
         self.total_iterations = []
         self.clean_iterations = []
         self.defec_iterations = []
-        self.selected = np.zeros(self.data.shape[0], dtype=bool)
+        self.selected = np.zeros(self.train_data.shape[0], dtype=bool)
 
     def select(self, size: int = 50, weights: np.ndarray = None):
         if weights is None:
-            idxs = np.random.choice(np.arange(self.data.shape[0]), size=size, replace=False)
+            idxs = np.random.choice(
+                np.arange(self.train_data.shape[0]),
+                size=size,
+                replace=False,
+            )
         else:
             weights = weights.flatten()
             weights[self.selected] = np.inf
@@ -40,7 +45,7 @@ class DataExplorer:
         return clean_idxs, defec_idxs
 
     def _split_by_class(self, idxs: np.ndarray):
-        labels = self.data[idxs, -1].astype(bool)
+        labels = self.train_data[idxs, -1].astype(bool)
         defec_idxs = idxs[labels]
         clean_idxs = idxs[~labels]
         return clean_idxs, defec_idxs
@@ -50,21 +55,21 @@ class DataExplorer:
             clean_idxs = np.concatenate(self.clean_iterations)
         else:
             clean_idxs = self.clean_iterations[iteration]
-        return self.data[clean_idxs, :-1], [self.images[i] for i in clean_idxs]
+        return self.train_data[clean_idxs, :-1], [self.images[i] for i in clean_idxs]
 
     def get_defec_selected(self, iteration: int = None):
         if iteration is None:
             defec_idxs = np.concatenate(self.defec_iterations)
         else:
             defec_idxs = self.defec_iterations[iteration]
-        return self.data[defec_idxs, :-1], [self.images[i] for i in defec_idxs]
+        return self.train_data[defec_idxs, :-1], [self.images[i] for i in defec_idxs]
 
     def get_selected(self, iteration: int = None):
         if iteration is None:
             total_idxs = np.concatenate(self.total_iterations)
         else:
             total_idxs = self.total_iterations[iteration]
-        return self.data[total_idxs], [self.images[i] for i in total_idxs]
+        return self.train_data[total_idxs], [self.images[i] for i in total_idxs]
 
 
 def save_result(
@@ -72,30 +77,34 @@ def save_result(
     latent_dim: int,
     explorer: DataExplorer,
     iteration: int,
-    valid_eval: np.ndarray = None,
     save_dir: Path = Path('results/'),
 ):
-    model_name = f'{type(model).__name__.lower()}_{latent_dim}'
+    # Validation results
+    valid_proj = model.project(explorer.valid_data[:, :-1])
+    valid_logpdf = model.evaluate(explorer.valid_data[:, :-1])
+    valid_eval = np.column_stack((valid_proj, explorer.valid_data[:, -1], valid_logpdf))
+    # Training results
+    train_proj = model.project(explorer.train_data[:, :-1])
+    train_logpdf = model.evaluate(explorer.train_data[:, :-1])
+    train_eval = np.column_stack((train_proj, explorer.train_data[:, -1], train_logpdf))
+    # Save location
+    model_name = f'{type(model).__name__.lower()}_{latent_dim:02d}'
     save_folder = save_dir / model_name / f'iteration_{iteration:02d}'
     save_folder.mkdir(parents=True, exist_ok=True)
-    clean_features, clean_image_paths = explorer.get_clean_selected(iteration)
-    defec_features, defec_image_paths = explorer.get_defec_selected(iteration)
-    np.save(save_folder / 'clean.npy', clean_features)
-    np.save(save_folder / 'defec.npy', defec_features)
-    if valid_eval is not None:
-        np.save(save_folder / 'valid.npy', valid_eval)
-    with (save_folder / 'model.pkl').open('wb') as f:
-        pickle.dump(model, f)
-    with (save_folder / 'clean_image_paths.txt').open('w') as f:
+    # Results saving
+    _, clean_image_paths = explorer.get_clean_selected(iteration)
+    _, defec_image_paths = explorer.get_defec_selected(iteration)
+    np.save(save_folder / 'valid.npy', valid_eval)
+    np.save(save_folder / 'train.npy', train_eval)
+    with (save_folder / 'clean_images.txt').open('w') as f:
         for path in clean_image_paths:
             f.write(f'{path}\n')
-    with (save_folder / 'defec_image_paths.txt').open('w') as f:
+    with (save_folder / 'defec_images.txt').open('w') as f:
         for path in defec_image_paths:
             f.write(f'{path}\n')
 
 
 def exploration(model_class, latent_dim, selection_size, num_iterations):
-    valid_data = np.load(DataExplorer.BASE_DIR / 'valid_split.npy')
     explorer = DataExplorer()
     weights = None
     for i in trange(num_iterations + 1):
@@ -106,7 +115,5 @@ def exploration(model_class, latent_dim, selection_size, num_iterations):
         clean_feats, _ = explorer.get_clean_selected()
         model = model_class(latent_dim)
         model.fit(clean_feats)
-        valid_logpdf = model.evaluate(valid_data[:, :-1])
-        valid_eval = np.column_stack((valid_data[:, -1], valid_logpdf))
-        save_result(model, latent_dim, explorer, i, valid_eval)
-        weights = model.evaluate(explorer.data[:, :-1])
+        save_result(model, latent_dim, explorer, i)
+        weights = model.evaluate(explorer.train_data[:, :-1])

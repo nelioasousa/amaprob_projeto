@@ -26,7 +26,7 @@ def get_image_groups(images):
 
 def train_val_split(data_dir, train_ratio):
     with open(data_dir / 'image_paths.txt', 'r') as f:
-        image_paths = f.readlines()
+        image_paths = f.read().splitlines()
     defec_images = [(i, p) for i, p in enumerate(image_paths) if 'defec' in p]
     clean_images = [(i, p) for i, p in enumerate(image_paths) if 'clean' in p]
     defec_groups = get_image_groups(defec_images)

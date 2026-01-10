@@ -89,7 +89,7 @@ class PPCA:
         self.D = X.shape[1]
         self.L = self.projection_dim
         self.mean, self.proj, self.var = _params_init(self.projection_dim, X)
-        self.marginal_cov, self.marginal_cov_inv, M_inv = _get_marginal_cov_and_inv(
+        self.marginal_cov, self.marginal_cov_inv, self.M_inv = _get_marginal_cov_and_inv(
             self.proj,
             self.var,
         )
@@ -98,8 +98,8 @@ class PPCA:
         stabilization_countdown = self.plateau_size
         metric_history = [old_metric]
         for _ in range(1, self.max_iterations + 1):
-            self.proj, self.var = _params_update(self.proj, self.var, X_to_mean, M_inv)
-            self.marginal_cov, self.marginal_cov_inv, M_inv = _get_marginal_cov_and_inv(
+            self.proj, self.var = _params_update(self.proj, self.var, X_to_mean, self.M_inv)
+            self.marginal_cov, self.marginal_cov_inv, self.M_inv = _get_marginal_cov_and_inv(
                 self.proj,
                 self.var,
             )
@@ -159,3 +159,7 @@ class PPCA:
         reconstructions = projections.dot(self.proj.transpose()) + self.mean
         error = np.pow(np.linalg.norm(X - reconstructions, axis=1), 2).sum().item()
         return reconstructions, error
+
+    def project(self, X: np.ndarray):
+        posterior_mean = self.M_inv.dot(self.proj.transpose()).dot((X - self.mean).transpose())
+        return posterior_mean.transpose()
