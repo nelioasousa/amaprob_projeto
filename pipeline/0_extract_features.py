@@ -62,7 +62,7 @@ def _run():
     )
 
     parser.add_argument(
-        '-m', '--model_name', type=str, default='yolo11n.pt',
+        '-m', '--model_name', type=str, default='yolo11m.pt',
         help='Pre-trained model name.'
     )
 
