@@ -94,8 +94,9 @@ def save_result(
     # Results saving
     _, clean_image_paths = explorer.get_clean_selected(iteration)
     _, defec_image_paths = explorer.get_defec_selected(iteration)
-    np.save(save_folder / 'valid.npy', valid_eval)
-    np.save(save_folder / 'train.npy', train_eval)
+    if valid_proj.shape[1]:
+        np.save(save_folder / 'valid.npy', valid_eval)
+        np.save(save_folder / 'train.npy', train_eval)
     with (save_folder / 'clean_images.txt').open('w') as f:
         for path in clean_image_paths:
             f.write(f'{path}\n')
