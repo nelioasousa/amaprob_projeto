@@ -1,4 +1,5 @@
 import random
+from time import monotonic
 import numpy as np
 from exploration import exploration
 
@@ -49,6 +50,7 @@ def _run():
     args = parser.parse_args()
 
     try:
+        start = monotonic()
         random.seed(args.random_seed)
         np.random.seed(args.random_seed)
         exploration(
@@ -57,7 +59,7 @@ def _run():
             selection_size=args.selection_size,
             num_iterations=args.iterations,
         )
-        print('[3] Naive exploration completed successfully.')
+        print(f'[3] Naive exploration completed successfully ({monotonic() - start:.2f} secs)')
         sys.exit(0)
     except Exception as e:
         import traceback

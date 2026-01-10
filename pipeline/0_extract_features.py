@@ -1,6 +1,7 @@
 import torch
 import random
 from pathlib import Path
+from time import monotonic
 from PIL import Image
 from tqdm import tqdm
 import numpy as np
@@ -86,6 +87,7 @@ def _run():
     ]
 
     try:
+        start = monotonic()
         print(f'[0] Extracting features from {len(imgs)} images...')
         torch.manual_seed(args.random_seed)
         random.seed(args.random_seed)
@@ -96,7 +98,7 @@ def _run():
             num_partitions=args.num_partitions,
             save_dir=args.output_dir,
         )
-        print('[0] Feature extraction completed successfully.')
+        print(f'[0] Feature extraction completed successfully ({monotonic() - start:.2f} secs)')
         sys.exit(0)
     except Exception as e:
         import traceback

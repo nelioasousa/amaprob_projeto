@@ -1,5 +1,6 @@
 import random
 from pathlib import Path
+from time import monotonic
 import numpy as np
 
 
@@ -91,13 +92,14 @@ def _run():
     args.data_dir = args.data_dir.resolve()
 
     try:
+        start = monotonic()
         random.seed(args.random_seed)
         np.random.seed(args.random_seed)
         train_val_split(
             data_dir=args.data_dir,
             train_ratio=args.train_ratio,
         )
-        print('[1] Train/validation split completed successfully.')
+        print(f'[1] Train-val split completed successfully ({monotonic() - start:.2f} secs)')
         sys.exit(0)
     except Exception as e:
         import traceback
