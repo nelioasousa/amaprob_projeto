@@ -1,7 +1,7 @@
-import pickle
 from pathlib import Path
 import numpy as np
 from tqdm import trange
+from ppca import PPCA
 
 
 class DataExplorer:
@@ -92,6 +92,11 @@ def save_result(
     save_folder = save_dir / model_name / f'iteration_{iteration:02d}'
     save_folder.mkdir(parents=True, exist_ok=True)
     # Results saving
+    if latent_dim == 2 and isinstance(model, PPCA):
+        # For projection heatmap plotting
+        M = model.proj.transpose().dot(model.proj) + model.var * np.identity(model.proj.shape[1])
+        np.save(save_folder / 'posterior_cov.npy', model.var * model.M_inv)
+        np.save(save_folder / 'posterior_cov_inv.npy', M / model.var)
     _, clean_image_paths = explorer.get_clean_selected(iteration)
     _, defec_image_paths = explorer.get_defec_selected(iteration)
     if valid_proj.shape[1]:
