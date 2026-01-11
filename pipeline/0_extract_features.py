@@ -68,7 +68,7 @@ def _run():
     )
 
     parser.add_argument(
-        '-p', '--num_partitions', type=int, default=2,
+        '-p', '--num_partitions', type=int, default=1,
         help='Number of partitions to split each image for feature extraction.'
     )
 
