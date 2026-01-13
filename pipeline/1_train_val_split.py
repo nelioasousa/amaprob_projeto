@@ -92,6 +92,7 @@ def _run():
     args.data_dir = args.data_dir.resolve()
 
     try:
+        print('[Script 1] Performing train-valid splitting of data...')
         start = monotonic()
         random.seed(args.random_seed)
         np.random.seed(args.random_seed)
@@ -99,7 +100,7 @@ def _run():
             data_dir=args.data_dir,
             train_ratio=args.train_ratio,
         )
-        print(f'[1] Train-val split completed successfully ({monotonic() - start:.2f} secs)')
+        print(f'[Script 1] Train-val split completed successfully ({monotonic() - start:.2f} secs)')
         sys.exit(0)
     except Exception as e:
         import traceback

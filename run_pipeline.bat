@@ -31,9 +31,10 @@ echo Running pipeline...
 python pipeline\0_extract_features.py --num_partitions 1 || goto :error
 python pipeline\1_train_val_split.py || goto :error
 
-python pipeline\2_ppca.py --latent-dim 2  || goto :error
-python pipeline\2_ppca.py --latent-dim 16 || goto :error
-python pipeline\2_ppca.py --latent-dim 32 || goto :error
+python pipeline\2_ppca.py --latent-dim 2   || goto :error
+python pipeline\2_ppca.py --latent-dim 16  || goto :error
+python pipeline\2_ppca.py --latent-dim 32  || goto :error
+python pipeline\2_ppca.py --latent-dim 128 || goto :error
 
 python pipeline\3_naive.py || goto :error
 

@@ -37,6 +37,7 @@ def _run():
 
     try:
         start = monotonic()
+        print(f'[Script 2] Exploring data using PPCA with latent dim of {args.latent_dim}')
         random.seed(args.random_seed)
         np.random.seed(args.random_seed)
         exploration(
@@ -45,7 +46,7 @@ def _run():
             selection_size=args.selection_size,
             num_iterations=args.iterations,
         )
-        print(f'[2] Exploration using PPCA completed successfully ({monotonic() - start:.2f} secs)')
+        print(f'[Script 2] Exploration using PPCA completed successfully ({monotonic() - start:.2f} secs)')
         sys.exit(0)
     except Exception as e:
         import traceback

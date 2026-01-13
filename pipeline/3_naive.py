@@ -51,6 +51,7 @@ def _run():
 
     try:
         start = monotonic()
+        print('[Script 3] Exploring data using naive/random approach')
         random.seed(args.random_seed)
         np.random.seed(args.random_seed)
         exploration(
@@ -59,7 +60,7 @@ def _run():
             selection_size=args.selection_size,
             num_iterations=args.iterations,
         )
-        print(f'[3] Naive exploration completed successfully ({monotonic() - start:.2f} secs)')
+        print(f'[Script 3] Naive exploration completed successfully ({monotonic() - start:.2f} secs)')
         sys.exit(0)
     except Exception as e:
         import traceback

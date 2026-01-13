@@ -1,0 +1,24 @@
+Activating virtual environment...
+Cleaning old results...
+Running pipeline...
+[Script 0] Extracting features from 6745 images...
+Feature Extraction: 100%|███████████████████████████████████████████████████████████████████████████████████████████| 6745/6745 [03:48<00:00, 29.48image/s]
+[Script 0] Feature extraction completed successfully (230.69 secs)
+[Script 1] Performing train-valid splitting of data...
+[Script 1] Train-val split completed successfully (0.16 secs)
+[Script 2] Exploring data using PPCA with latent dim of 2
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 21/21 [01:29<00:00,  4.25s/it]
+[Script 2] Exploration using PPCA completed successfully (89.44 secs)
+[Script 2] Exploring data using PPCA with latent dim of 16
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 21/21 [01:36<00:00,  4.60s/it]
+[Script 2] Exploration using PPCA completed successfully (96.64 secs)
+[Script 2] Exploring data using PPCA with latent dim of 32
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 21/21 [01:49<00:00,  5.19s/it]
+[Script 2] Exploration using PPCA completed successfully (109.11 secs)
+[Script 2] Exploring data using PPCA with latent dim of 128
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 21/21 [07:41<00:00, 21.96s/it]
+[Script 2] Exploration using PPCA completed successfully (461.25 secs)
+[Script 3] Exploring data using naive/random approach
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 21/21 [00:00<00:00, 478.53it/s]
+[Script 3] Naive exploration completed successfully (0.08 secs)
+Pipeline completed successfully.
